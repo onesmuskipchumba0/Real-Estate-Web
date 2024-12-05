@@ -52,12 +52,12 @@ const Home = () => {
             <p className="mb-8 text-lg">
               Discover amazing properties that match your lifestyle in the most desired locations
             </p>
-            <div className="join shadow-lg bg-base-100 p-1 w-full max-w-md mx-auto">
+            <div className="join shadow-lg bg-base-100 p-1 w-full max-w-md mx-auto rounded-2xl">
               <input 
-                className="input join-item flex-1 focus:outline-none" 
+                className="input join-item flex-1 focus:outline-none rounded-l-xl" 
                 placeholder="Search by location..."
               />
-              <button className="btn btn-primary join-item hover:btn-primary-focus transition-all duration-300">
+              <button className="btn btn-primary join-item rounded-r-xl hover:btn-primary-focus transition-all duration-300 text-white">
                 <FaSearch className="mr-2" /> Search
               </button>
             </div>
@@ -69,29 +69,29 @@ const Home = () => {
       <div className="bg-base-200 py-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="stat bg-base-100 rounded-box shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="stat bg-base-100 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
               <div className="stat-figure text-primary">
                 <FaHome className="text-3xl" />
               </div>
-              <div className="stat-title">Properties</div>
+              <div className="stat-title font-medium">Properties</div>
               <div className="stat-value text-primary">1,000+</div>
-              <div className="stat-desc">Available listings</div>
+              <div className="stat-desc text-gray-600">Available listings</div>
             </div>
-            <div className="stat bg-base-100 rounded-box shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="stat bg-base-100 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
               <div className="stat-figure text-primary">
                 <FaStar className="text-3xl" />
               </div>
-              <div className="stat-title">Happy Clients</div>
+              <div className="stat-title font-medium">Happy Clients</div>
               <div className="stat-value text-primary">500+</div>
-              <div className="stat-desc">Satisfied customers</div>
+              <div className="stat-desc text-gray-600">Satisfied customers</div>
             </div>
-            <div className="stat bg-base-100 rounded-box shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="stat bg-base-100 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
               <div className="stat-figure text-primary">
                 <FaMapMarkerAlt className="text-3xl" />
               </div>
-              <div className="stat-title">Locations</div>
+              <div className="stat-title font-medium">Locations</div>
               <div className="stat-value text-primary">50+</div>
-              <div className="stat-desc">Cities covered</div>
+              <div className="stat-desc text-gray-600">Cities covered</div>
             </div>
           </div>
         </div>
@@ -104,7 +104,7 @@ const Home = () => {
           {featuredProperties.map((property) => (
             <div 
               key={property.id} 
-              className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
+              className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 rounded-2xl overflow-hidden"
             >
               <figure className="relative h-64">
                 <img 
@@ -112,7 +112,7 @@ const Home = () => {
                   alt={property.title} 
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 right-4 badge badge-primary text-lg p-4">
+                <div className="absolute top-4 right-4 badge badge-primary text-lg p-4 rounded-xl text-white font-medium">
                   {property.price}
                 </div>
               </figure>
@@ -131,7 +131,7 @@ const Home = () => {
                   </span>
                 </div>
                 <div className="card-actions justify-end mt-4">
-                  <button className="btn btn-primary hover:btn-primary-focus transition-all duration-300">
+                  <button className="btn btn-primary hover:btn-primary-focus transition-all duration-300 rounded-xl text-white">
                     View Details
                   </button>
                 </div>
@@ -142,7 +142,7 @@ const Home = () => {
         <div className="text-center mt-12">
           <Link 
             to="/properties"
-            className="btn btn-primary btn-lg hover:btn-primary-focus transition-all duration-300"
+            className="btn btn-primary btn-lg hover:btn-primary-focus transition-all duration-300 rounded-xl text-white"
           >
             View All Properties
           </Link>
@@ -165,7 +165,7 @@ const Home = () => {
             </p>
             <Link 
               to="/contact"
-              className="btn btn-secondary btn-lg hover:scale-105 transition-all duration-300"
+              className="btn btn-secondary btn-lg hover:scale-105 transition-all duration-300 rounded-xl text-white"
             >
               Contact Us Today
             </Link>
@@ -178,21 +178,21 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-center mb-12">Our Services</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
               <div className="card-body items-center text-center">
                 <FaHome className="text-4xl text-primary mb-4" />
                 <h3 className="card-title">Property Sales</h3>
                 <p>Find your dream home from our extensive collection of properties</p>
               </div>
             </div>
-            <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
               <div className="card-body items-center text-center">
                 <FaHandshake className="text-4xl text-primary mb-4" />
                 <h3 className="card-title">Expert Consultation</h3>
                 <p>Get professional advice from our experienced real estate agents</p>
               </div>
             </div>
-            <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
               <div className="card-body items-center text-center">
                 <FaDollarSign className="text-4xl text-primary mb-4" />
                 <h3 className="card-title">Property Valuation</h3>
