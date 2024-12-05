@@ -1,12 +1,22 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { FaHome, FaBuilding, FaInfoCircle, FaEnvelope, FaSignInAlt } from 'react-icons/fa';
 import { RiHomeSmileFill } from 'react-icons/ri';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   const handleGetStarted = () => {
     navigate('/signup');
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error.message);
+    }
   };
 
   return (
@@ -55,10 +65,27 @@ const Navbar = () => {
         </ul>
       </div>
       <div className="navbar-end">
-        <Link to="/login" className="btn btn-ghost mr-2">Login</Link>
-        <button onClick={handleGetStarted} className="btn btn-primary rounded-xl text-white hover:btn-primary-focus transition-all duration-300">
-          <FaSignInAlt className="mr-2" /> Get Started
-        </button>
+        {user ? (
+          <div className="dropdown dropdown-end">
+            <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+              <div className="w-10 rounded-full">
+                <img src={user.user_metadata?.avatar_url || 'https://api.dicebear.com/6.x/initials/svg?seed=' + user.email} alt="avatar" />
+              </div>
+            </label>
+            <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+              <li><Link to="/profile">Profile</Link></li>
+              <li><Link to="/settings">Settings</Link></li>
+              <li><button onClick={handleSignOut}>Logout</button></li>
+            </ul>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <Link to="/login" className="btn btn-ghost">Login</Link>
+            <button onClick={handleGetStarted} className="btn btn-primary rounded-xl text-white hover:btn-primary-focus transition-all duration-300">
+              <FaSignInAlt className="mr-2" /> Get Started
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

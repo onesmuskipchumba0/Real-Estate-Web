@@ -16,30 +16,82 @@ import {
   FaShieldAlt,
   FaHandshake
 } from 'react-icons/fa';
+import { supabase } from '../config/supabase';
+import { useAuth } from '../context/AuthContext';
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      setMessage({ type: 'error', text: "Passwords don't match" });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setMessage({ type: '', text: '' });
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin + '/login'
+        }
+      });
+
+      if (error) throw error;
+      
+      // Check if email confirmation is required
+      if (data?.user?.identities?.length === 0) {
+        setMessage({ 
+          type: 'error', 
+          text: 'This email is already registered. Please login or reset your password.' 
+        });
+      } else {
+        setMessage({ 
+          type: 'success', 
+          text: 'Registration successful! You can now login with your credentials.' 
+        });
+        setTimeout(() => navigate('/login'), 2000);
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Signup submitted:', formData);
-    navigate('/login');
+  const handleGoogleSignup = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+      if (error) throw error;
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message });
+    }
+  };
+
+  const handleFacebookSignup = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+      });
+      if (error) throw error;
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message });
+    }
   };
 
   const features = [
@@ -102,23 +154,17 @@ const Signup = () => {
               Fill in your details to get started
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-4">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaUser className="text-primary" />
-                  </div>
-                  <input
-                    type="text"
-                    name="fullName"
-                    required
-                    className="input input-bordered w-full pl-10 bg-base-100 border-primary/20 focus:border-primary"
-                    placeholder="Full Name"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                  />
+            <form onSubmit={handleSignup} className="space-y-6">
+              {message.text && (
+                <div className={`p-3 rounded-lg text-sm ${
+                  message.type === 'error' 
+                    ? 'bg-red-50 text-red-500' 
+                    : 'bg-green-50 text-green-500'
+                }`}>
+                  {message.text}
                 </div>
-
+              )}
+              <div className="space-y-4">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <FaEnvelope className="text-primary" />
@@ -129,23 +175,8 @@ const Signup = () => {
                     required
                     className="input input-bordered w-full pl-10 bg-base-100 border-primary/20 focus:border-primary"
                     placeholder="Email Address"
-                    value={formData.email}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaPhone className="text-primary" />
-                  </div>
-                  <input
-                    type="tel"
-                    name="phone"
-                    required
-                    className="input input-bordered w-full pl-10 bg-base-100 border-primary/20 focus:border-primary"
-                    placeholder="Phone Number"
-                    value={formData.phone}
-                    onChange={handleChange}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
 
@@ -159,8 +190,8 @@ const Signup = () => {
                     required
                     className="input input-bordered w-full pl-10 pr-10 bg-base-100 border-primary/20 focus:border-primary"
                     placeholder="Password"
-                    value={formData.password}
-                    onChange={handleChange}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <button
                     type="button"
@@ -185,8 +216,8 @@ const Signup = () => {
                     required
                     className="input input-bordered w-full pl-10 pr-10 bg-base-100 border-primary/20 focus:border-primary"
                     placeholder="Confirm Password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                   />
                   <button
                     type="button"
@@ -203,8 +234,12 @@ const Signup = () => {
               </div>
 
               <div className="space-y-6">
-                <button type="submit" className="btn btn-primary w-full">
-                  Create Account
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-primary hover:bg-primary-focus text-white py-3 rounded-lg transition duration-300"
+                >
+                  {loading ? 'Creating account...' : 'Create account'}
                 </button>
 
                 <div className="relative">
@@ -218,24 +253,20 @@ const Signup = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="flex gap-4 justify-center">
                   <button
                     type="button"
-                    className="btn btn-outline hover:btn-primary"
+                    onClick={handleGoogleSignup}
+                    className="p-3 border rounded-lg hover:bg-gray-50 transition duration-300"
                   >
                     <FaGoogle className="text-xl" />
                   </button>
                   <button
                     type="button"
-                    className="btn btn-outline hover:btn-primary"
+                    onClick={handleFacebookSignup}
+                    className="p-3 border rounded-lg hover:bg-gray-50 transition duration-300"
                   >
                     <FaFacebook className="text-xl" />
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-outline hover:btn-primary"
-                  >
-                    <FaApple className="text-xl" />
                   </button>
                 </div>
               </div>

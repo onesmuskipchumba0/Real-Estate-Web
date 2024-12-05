@@ -10,26 +10,57 @@ import {
   FaEye,
   FaEyeSlash
 } from 'react-icons/fa';
+import { supabase } from '../config/supabase';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      setMessage({ type: '', text: '' });
+      
+      const { error } = await signIn({ email, password });
+
+      if (error) throw error;
+      
+      setMessage({ type: 'success', text: 'Login successful!' });
+      setTimeout(() => navigate('/'), 1500); // Redirect after showing success message
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Login submitted:', formData);
-    navigate('/');
+  const handleGoogleLogin = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+      if (error) throw error;
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message });
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+      });
+      if (error) throw error;
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message });
+    }
   };
 
   return (
@@ -49,7 +80,16 @@ const Login = () => {
               Enter your credentials to access your account
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleLogin} className="space-y-6">
+              {message.text && (
+                <div className={`p-3 rounded-lg text-sm ${
+                  message.type === 'error' 
+                    ? 'bg-red-50 text-red-500' 
+                    : 'bg-green-50 text-green-500'
+                }`}>
+                  {message.text}
+                </div>
+              )}
               <div className="space-y-4">
                 <div>
                   <div className="relative">
@@ -63,8 +103,8 @@ const Login = () => {
                       required
                       className="input input-bordered w-full pl-10 bg-base-100 border-primary/20 focus:border-primary"
                       placeholder="Email address"
-                      value={formData.email}
-                      onChange={handleChange}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
                 </div>
@@ -81,8 +121,8 @@ const Login = () => {
                       required
                       className="input input-bordered w-full pl-10 pr-10 bg-base-100 border-primary/20 focus:border-primary"
                       placeholder="Password"
-                      value={formData.password}
-                      onChange={handleChange}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                     <button
                       type="button"
@@ -121,9 +161,10 @@ const Login = () => {
 
               <button
                 type="submit"
-                className="btn btn-primary w-full"
+                disabled={loading}
+                className="w-full bg-primary hover:bg-primary-focus text-white py-3 rounded-lg transition duration-300"
               >
-                Sign in
+                {loading ? 'Signing in...' : 'Sign in'}
               </button>
 
               <div className="relative">
@@ -137,22 +178,24 @@ const Login = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="flex gap-4 justify-center">
                 <button
                   type="button"
-                  className="btn btn-outline hover:btn-primary"
+                  onClick={handleGoogleLogin}
+                  className="p-3 border rounded-lg hover:bg-gray-50 transition duration-300"
                 >
                   <FaGoogle className="text-xl" />
                 </button>
                 <button
                   type="button"
-                  className="btn btn-outline hover:btn-primary"
+                  onClick={handleFacebookLogin}
+                  className="p-3 border rounded-lg hover:bg-gray-50 transition duration-300"
                 >
                   <FaFacebook className="text-xl" />
                 </button>
                 <button
                   type="button"
-                  className="btn btn-outline hover:btn-primary"
+                  className="p-3 border rounded-lg hover:bg-gray-50 transition duration-300"
                 >
                   <FaApple className="text-xl" />
                 </button>
