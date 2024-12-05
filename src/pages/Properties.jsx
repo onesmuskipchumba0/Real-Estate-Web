@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { FaSearch, FaBed, FaBath, FaRuler, FaMapMarkerAlt, FaHeart, FaFilter, FaSortAmountDown } from 'react-icons/fa';
 import { BiArea } from 'react-icons/bi';
 
 const Properties = () => {
   const [favorites, setFavorites] = useState(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState({
     type: 'all',
     priceRange: 'all',
@@ -82,6 +83,62 @@ const Properties = () => {
     });
   };
 
+  // Filter properties based on search query and active filters
+  const filteredProperties = useMemo(() => {
+    return properties.filter(property => {
+      const matchesSearch = searchQuery === '' || 
+        property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        property.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        property.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        property.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        property.price.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        property.agent.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        property.features.some(feature => 
+          feature.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+      const matchesType = activeFilters.type === 'all' || 
+        property.type.toLowerCase() === activeFilters.type.toLowerCase();
+
+      const matchesBeds = activeFilters.beds === 'all' || 
+        property.beds === parseInt(activeFilters.beds);
+
+      const matchesLocation = activeFilters.location === 'all' || 
+        property.location.toLowerCase().includes(activeFilters.location.toLowerCase());
+
+      // Price range filter
+      let matchesPrice = true;
+      if (activeFilters.priceRange !== 'all') {
+        const propertyPrice = parseInt(property.price.replace(/[^0-9]/g, ''));
+        switch (activeFilters.priceRange) {
+          case 'under20m':
+            matchesPrice = propertyPrice < 20;
+            break;
+          case '20m-30m':
+            matchesPrice = propertyPrice >= 20 && propertyPrice <= 30;
+            break;
+          case '30m-40m':
+            matchesPrice = propertyPrice >= 30 && propertyPrice <= 40;
+            break;
+          case 'over40m':
+            matchesPrice = propertyPrice > 40;
+            break;
+          default:
+            matchesPrice = true;
+        }
+      }
+
+      return matchesSearch && matchesType && matchesBeds && matchesLocation && matchesPrice;
+    });
+  }, [searchQuery, activeFilters, properties]);
+
+  const handleFilterChange = (filterType, value) => {
+    setActiveFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-base-100 py-8">
       <div className="container mx-auto px-4">
@@ -99,152 +156,131 @@ const Properties = () => {
             {/* Search Input */}
             <div className="join w-full">
               <input 
-                type="text" 
-                placeholder="Search properties..." 
-                className="input input-bordered join-item flex-1 w-full rounded-l-xl" 
+                type="text"
+                placeholder="Search properties..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="input input-bordered join-item w-full"
               />
-              <button className="btn btn-primary join-item rounded-r-xl text-white">
+              <button className="btn join-item">
                 <FaSearch />
               </button>
             </div>
 
             {/* Property Type Filter */}
             <select 
-              className="select select-bordered w-full rounded-xl"
+              className="select select-bordered w-full"
               value={activeFilters.type}
-              onChange={(e) => setActiveFilters({...activeFilters, type: e.target.value})}
+              onChange={(e) => handleFilterChange('type', e.target.value)}
             >
               <option value="all">All Property Types</option>
-              <option value="house">House</option>
               <option value="apartment">Apartment</option>
               <option value="villa">Villa</option>
               <option value="penthouse">Penthouse</option>
+              <option value="townhouse">Townhouse</option>
             </select>
 
             {/* Price Range Filter */}
             <select 
-              className="select select-bordered w-full rounded-xl"
+              className="select select-bordered w-full"
               value={activeFilters.priceRange}
-              onChange={(e) => setActiveFilters({...activeFilters, priceRange: e.target.value})}
+              onChange={(e) => handleFilterChange('priceRange', e.target.value)}
             >
-              <option value="all">Any Price Range</option>
-              <option value="0-300000">$0 - $300,000</option>
-              <option value="300000-600000">$300,000 - $600,000</option>
-              <option value="600000-1000000">$600,000 - $1,000,000</option>
-              <option value="1000000+">$1,000,000+</option>
+              <option value="all">All Price Ranges</option>
+              <option value="under20m">Under 20M</option>
+              <option value="20m-30m">20M - 30M</option>
+              <option value="30m-40m">30M - 40M</option>
+              <option value="over40m">Over 40M</option>
             </select>
 
             {/* Location Filter */}
             <select 
-              className="select select-bordered w-full rounded-xl"
+              className="select select-bordered w-full"
               value={activeFilters.location}
-              onChange={(e) => setActiveFilters({...activeFilters, location: e.target.value})}
+              onChange={(e) => handleFilterChange('location', e.target.value)}
             >
               <option value="all">All Locations</option>
-              <option value="beverly-hills">Beverly Hills</option>
-              <option value="manhattan">Manhattan</option>
-              <option value="malibu">Malibu</option>
-              <option value="downtown">Downtown</option>
+              <option value="kileleshwa">Kileleshwa</option>
+              <option value="westlands">Westlands</option>
+              <option value="kilimani">Kilimani</option>
+              <option value="lavington">Lavington</option>
             </select>
           </div>
 
-          {/* Advanced Filters */}
+          {/* Additional Filters */}
           <div className="flex flex-wrap gap-4">
-            <button className="btn btn-outline btn-sm rounded-xl gap-2">
-              <FaFilter /> More Filters
-            </button>
-            <button className="btn btn-outline btn-sm rounded-xl gap-2">
-              <FaSortAmountDown /> Sort By
-            </button>
-            <div className="flex-grow"></div>
-            <span className="text-base-content/70">Showing {properties.length} properties</span>
+            {/* Bedrooms Filter */}
+            <select 
+              className="select select-bordered"
+              value={activeFilters.beds}
+              onChange={(e) => handleFilterChange('beds', e.target.value)}
+            >
+              <option value="all">Any Beds</option>
+              <option value="1">1 Bed</option>
+              <option value="2">2 Beds</option>
+              <option value="3">3 Beds</option>
+              <option value="4">4+ Beds</option>
+            </select>
           </div>
         </div>
 
-        {/* Properties Grid */}
+        {/* Results Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {properties.map((property) => (
-            <div 
-              key={property.id} 
-              className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 rounded-2xl overflow-hidden"
-            >
-              {/* Property Image */}
-              <figure className="relative h-64">
-                <img 
-                  src={property.image} 
-                  alt={property.title} 
-                  className="w-full h-full object-cover"
-                />
-                <button 
-                  onClick={() => toggleFavorite(property.id)}
-                  className={`absolute top-4 right-4 btn btn-circle btn-sm ${
-                    favorites.has(property.id) ? 'btn-primary' : 'btn-ghost bg-base-100/50 hover:bg-base-100'
-                  }`}
-                >
-                  <FaHeart className={favorites.has(property.id) ? 'text-white' : 'text-gray-500'} />
-                </button>
-                <div className="absolute bottom-4 right-4 bg-primary text-white font-semibold text-base px-4 py-1.5 rounded-lg shadow-md">
-                  {property.price}
-                </div>
-              </figure>
-
-              {/* Property Details */}
-              <div className="card-body">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h2 className="card-title text-xl">{property.title}</h2>
-                    <p className="flex items-center gap-2 text-base-content/70">
-                      <FaMapMarkerAlt className="text-primary" />
-                      {property.location}
-                    </p>
-                  </div>
-                  <div className="text-sm badge badge-ghost">
-                    {property.type}
-                  </div>
-                </div>
-                <p className="text-base-content/70 mt-2">{property.description}</p>
-
-                {/* Property Features */}
-                <div className="flex flex-wrap gap-4 mt-4 text-base-content/70">
-                  <div className="flex items-center gap-2">
-                    <FaBed /> {property.beds} beds
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FaBath /> {property.baths} baths
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <BiArea /> {property.area} sqft
-                  </div>
-                </div>
-
-                {/* Property Amenities */}
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {property.features.map((feature, index) => (
-                    <span key={index} className="badge badge-outline rounded-lg">
-                      {feature}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="card-actions justify-end mt-6">
-                  <button className="btn btn-primary rounded-xl text-white hover:btn-primary-focus transition-all duration-300">
-                    View Details
+          {filteredProperties.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <h3 className="text-xl font-semibold mb-2">No properties found</h3>
+              <p className="text-base-content/70">
+                Try adjusting your search criteria or filters
+              </p>
+            </div>
+          ) : (
+            filteredProperties.map(property => (
+              <div key={property.id} className="card bg-base-200 shadow-xl">
+                <figure className="relative">
+                  <img 
+                    src={property.image} 
+                    alt={property.title}
+                    className="h-64 w-full object-cover"
+                  />
+                  <button
+                    onClick={() => toggleFavorite(property.id)}
+                    className={`absolute top-4 right-4 btn btn-circle btn-sm ${
+                      favorites.has(property.id) ? 'btn-primary' : 'btn-ghost bg-base-100/50'
+                    }`}
+                  >
+                    <FaHeart className={favorites.has(property.id) ? 'text-primary-content' : 'text-base-content'} />
                   </button>
+                </figure>
+                <div className="card-body">
+                  <h2 className="card-title">{property.title}</h2>
+                  <p className="flex items-center gap-2 text-base-content/70">
+                    <FaMapMarkerAlt /> {property.location}
+                  </p>
+                  <p className="text-xl font-semibold text-primary">{property.price}</p>
+                  <p className="text-base-content/70">{property.description}</p>
+                  
+                  <div className="flex flex-wrap gap-4 mt-4">
+                    <div className="flex items-center gap-2">
+                      <FaBed className="text-base-content/70" />
+                      <span>{property.beds} Beds</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FaBath className="text-base-content/70" />
+                      <span>{property.baths} Baths</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <BiArea className="text-base-content/70" />
+                      <span>{property.area} sq ft</span>
+                    </div>
+                  </div>
+
+                  <div className="card-actions justify-end mt-4">
+                    <button className="btn btn-primary">View Details</button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Pagination */}
-        <div className="flex justify-center mt-12">
-          <div className="join">
-            <button className="join-item btn btn-outline rounded-l-xl">«</button>
-            <button className="join-item btn btn-outline">1</button>
-            <button className="join-item btn btn-primary">2</button>
-            <button className="join-item btn btn-outline">3</button>
-            <button className="join-item btn btn-outline rounded-r-xl">»</button>
-          </div>
+            ))
+          )}
         </div>
       </div>
     </div>
