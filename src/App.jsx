@@ -5,11 +5,13 @@ import Home from './pages/Home';
 import Properties from './pages/Properties';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-base-100 pt-16 flex flex-col">
+      <div className="flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-grow">
           <Routes>
@@ -17,6 +19,8 @@ function App() {
             <Route path="/properties" element={<Properties />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
           </Routes>
         </main>
         <Footer />
@@ -25,4 +29,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
