@@ -207,4 +207,4 @@ Visit our [live demo](https://dreamhome-demo.com) to see the application in acti
 
 ---
 
-Made with ❤️ by the DreamHome Team
+Made with ❤️ by Onesmus Bett
