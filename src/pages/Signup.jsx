@@ -170,10 +170,11 @@ const Signup = () => {
                     <FaEnvelope className="text-primary" />
                   </div>
                   <input
-                    type="email"
+                    id="email"
                     name="email"
+                    type="email"
                     required
-                    className="input input-bordered w-full pl-10 bg-base-100 border-primary/20 focus:border-primary"
+                    className="input w-full pl-10 focus:outline-none focus:ring-2 focus:ring-primary/20"
                     placeholder="Email Address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -185,10 +186,11 @@ const Signup = () => {
                     <FaLock className="text-primary" />
                   </div>
                   <input
-                    type={showPassword ? "text" : "password"}
+                    id="password"
                     name="password"
+                    type={showPassword ? "text" : "password"}
                     required
-                    className="input input-bordered w-full pl-10 pr-10 bg-base-100 border-primary/20 focus:border-primary"
+                    className="input w-full pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-primary/20"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -211,10 +213,11 @@ const Signup = () => {
                     <FaLock className="text-primary" />
                   </div>
                   <input
-                    type={showConfirmPassword ? "text" : "password"}
+                    id="confirmPassword"
                     name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
                     required
-                    className="input input-bordered w-full pl-10 pr-10 bg-base-100 border-primary/20 focus:border-primary"
+                    className="input w-full pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-primary/20"
                     placeholder="Confirm Password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
